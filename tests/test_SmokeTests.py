@@ -1,3 +1,4 @@
+
 import os
 import pytest
 from selenium import webdriver
@@ -54,11 +55,15 @@ class TestSMOKETESTS():
   def test_adminPage1(self):
     self.driver.get("http://127.0.0.1:5500/teton/1.6/admin.html")
     self.driver.set_window_size(1759, 694)
-    assert self.driver.find_elements(By.ID, "username")
+    user = self.wait.until(expected_conditions.presence_of_element_located((By.ID, "username")))
+    pwd = self.driver.find_element(By.CSS_SELECTOR, 'input[type="password"]')
+    user.clear(); user.send_keys("bad")
+    pwd.clear(); pwd.send_keys("bad")
     submit = self.driver.find_element(By.CSS_SELECTOR, ".mysubmit:nth-child(4)")
     self.driver.execute_script("arguments[0].scrollIntoView(true);", submit)
     submit.click()
-    assert self.driver.find_element(By.CSS_SELECTOR, ".errorMessage").text == "Invalid username and password."
+    self.wait.until(expected_conditions.text_to_be_present_in_element((By.CSS_SELECTOR, ".errorMessage"), "Invalid"))
+    assert self.driver.find_element(By.CSS_SELECTOR, ".errorMessage").text.strip() == "Invalid username and password."
 
   def test_joinPage1(self):
     self.driver.get("http://127.0.0.1:5500/teton/1.6/join.html")
