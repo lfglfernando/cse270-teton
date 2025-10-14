@@ -22,15 +22,10 @@ jobs:
         with:
           python-version: '3.12'
 
-      - name: Install dependencies
+      - name: Install test dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install flake8 pytest requests pytest-mock
-
-      - name: Lint with flake8
-        run: |
-          # Lint the website and tests; ignore long-line warnings to avoid noise
-          flake8 teton tests --ignore=E501 --statistics --count --exit-zero
+          pip install pytest requests pytest-mock
 
       - name: Startup HTTP Server for pipeline tests
         run: |
@@ -44,8 +39,30 @@ jobs:
         if: always()
         run: kill $(cat server.pid) || true
 
-  deploy:
+  analyze:
     needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout the latest code
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install flake8
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8
+
+      - name: Lint with flake8
+        run: |
+          # Show stats and total warnings, but don't fail the job
+          flake8 teton tests --ignore=E501 --statistics --count --exit-zero
+
+  deploy:
+    needs: [build, analyze]
     runs-on: ubuntu-latest
     environment:
       name: github-pages
