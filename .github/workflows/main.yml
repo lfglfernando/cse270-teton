@@ -1,0 +1,53 @@
+name: CI/CD Teton
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install flake8 pytest
+      - name: Lint with flake8
+        run: flake8 .
+      - name: Start HTTP server for tests
+        run: |
+          python -m http.server 8000 --directory teton & echo $! > server.pid
+          sleep 2
+      - name: Run tests
+        run: pytest -q
+      - name: Stop server
+        if: always()
+        run: kill $(cat server.pid) || true
+
+  deploy:
+    needs: build
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build static site
+        run: |
+          mkdir -p dist
+          cp -a teton/* dist/
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
