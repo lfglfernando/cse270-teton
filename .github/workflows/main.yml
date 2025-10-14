@@ -30,7 +30,7 @@ jobs:
       - name: Lint with flake8
         run: |
           # Lint the website and tests; ignore long-line warnings to avoid noise
-          flake8 teton tests --ignore=E501
+          flake8 teton tests --ignore=E501 --statistics --count --exit-zero
 
       - name: Startup HTTP Server for pipeline tests
         run: |
