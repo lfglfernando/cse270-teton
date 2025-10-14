@@ -18,10 +18,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Start static server
+      - name: Start static server (serve repo root)
         run: |
-          python -m http.server 5500 --directory teton/1.6 &
+          python -m http.server 5500 --directory . &
           sleep 2
+
+      - name: Smoke check URLs
+        run: |
+          curl -sS -I http://127.0.0.1:5500/teton/1.6/index.html | head -n 1
+          curl -sS -I http://127.0.0.1:5500/teton/1.6/admin.html | head -n 1
+          curl -sS -I http://127.0.0.1:5500/teton/1.6/join.html  | head -n 1
+          curl -sS -I http://127.0.0.1:5500/teton/1.6/directory.html | head -n 1
 
       - name: Run pytest (Chrome headless)
         env:
