@@ -6,7 +6,6 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
 
@@ -24,8 +23,7 @@ jobs:
           python -m http.server 5500 --directory teton/1.6 &
           sleep 2
 
-      - name: Run tests
+      - name: Run pytest (Chrome headless)
         env:
-          BROWSER: chrome   # ver punto 2
-          CI: "true"
+          BROWSER: chrome
         run: pytest -q
