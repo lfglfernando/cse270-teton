@@ -10,15 +10,24 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
 class TestSMOKETESTS():
   def setup_method(self, method):
-    options = Options()
-    options.headless = True
-    self.driver = webdriver.Firefox(options=options)
+    browser = os.environ.get("BROWSER", "firefox").lower()
+    if browser == "chrome":
+      opts = ChromeOptions()
+      opts.add_argument("--headless=new")
+      opts.add_argument("--no-sandbox")
+      opts.add_argument("--disable-dev-shm-usage")
+      self.driver = webdriver.Chrome(options=opts)   # Selenium Manager baja el driver
+    else:
+      opts = FirefoxOptions()
+      opts.headless = True
+      self.driver = webdriver.Firefox(options=opts)
+
     self.wait = WebDriverWait(self.driver, 10)
-    self.vars = {}
   
   def teardown_method(self, method):
     self.driver.quit()

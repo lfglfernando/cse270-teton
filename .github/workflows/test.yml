@@ -1,0 +1,31 @@
+name: tests
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Start static server
+        run: |
+          python -m http.server 5500 --directory teton/1.6 &
+          sleep 2
+
+      - name: Run tests
+        env:
+          BROWSER: chrome   # ver punto 2
+          CI: "true"
+        run: pytest -q
